@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="com.nativelibs4java:bridj:0.6.2" type="repository">
+    <properties maven-id="com.nativelibs4java:bridj:0.6.2" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/nativelibs4java/bridj/0.6.2/bridj-0.6.2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/osgi/org.osgi.core/4.3.0/org.osgi.core-4.3.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/google/android/android/2.3.3/android-2.3.3.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/google/android/tools/dx/1.7/dx-1.7.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
