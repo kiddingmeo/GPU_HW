@@ -4,7 +4,7 @@
  * Monte-Carlo Assignment
  */
 
-package N11592683_HW3;
+package MonteCarlo;
 
 // This class is used to transform the expected payout of an option to its current price through discounting.
 public class calculatePrice {

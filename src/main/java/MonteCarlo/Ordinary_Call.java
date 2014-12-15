@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import N11592683_HW3.StockPath.Data;
 
 // This class implements of the algorithm to calculate the payout of ordinary European call option.
-public class Ordinary_Call implements PayOut{
+class Ordinary_Call implements PayOut{
 	
 	// Calculating the payout of European call option.
 	public double getPayout(ArrayList<Data> stockpath, double strikeprice) {

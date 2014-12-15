@@ -3,71 +3,76 @@ package MonteCarlo;
 import com.nativelibs4java.opencl.*;
 import org.bridj.Pointer;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import static org.bridj.Pointer.allocateFloats;
 
 
-public class GPUGenerator implements I_RandomVectorGenerator {
-    // length of random vector required
+public class GPUGenerator implements RandomVectorGenerator {
+    // length of random vector
     private int N;
-    // batch number required
+    // batch number
     private int batchNum;
-    // store the normal random vector stored in GPU to generate Gaussian
     private double[] normalSequence;
-    // tracks whether we need to regenerate the normal random variable or not
     private int idx;
+    double x =0;
+    double y =0;
 
     /*
     * The constructor of GPU Generator
     * */
-    public GPUGenerator(int N, int batchNum){
+    public GPUGenerator(int N, int batchNum) {
         this.N = N;
         this.batchNum = batchNum;
         normalSequence = getGPUGaussian(this.batchNum);
         idx = 0;
     }
 
+
+
     @Override
-    /*
-    * This function aims to generate the normal random variable with length N
-    * Note that in here we use the GPU to compute 2 million numbers
+   /*
+    *  Generating the normal random variable with length N
     * */
-    public double[] getVector() {
-        double[] vector = new double[N];
-        for(int i = 0; i < N; i++){
-            // if the idx reaches the generated amount of normal random number
-            // we regenerate a batch of random number again
-            if(idx == 2*batchNum - 1) {
+    public ArrayList<Double> randomvectorgenerator(double x, double y, int N) {
+
+
+
+        ArrayList<Double> v = new ArrayList<Double>();
+        for (int i = 0; i < N; i++){
+
+
+            if (idx == 2 * batchNum - 1) {
                 normalSequence = getGPUGaussian(this.batchNum);
             }
-            // we assign the generated normal to the vector needed for the simulation
-            vector[i] = normalSequence[idx];
+
+            v.add(normalSequence[idx]);
             idx++;
+
         }
-        return vector;
+        return v;
     }
 
     /*
-    * This function aims to generate normal random variable using the best device chosen by kernal
-    * Note that it will return an array with size batchNum
+    * using the best device chosen by kernal to generate normal random variable
     * */
-    public double[] getGPUGaussian(int batchNum){
+    public double[] getGPUGaussian(int batchNum) {
 
         idx = 0;
         // Creating the platform which is out computer.
         CLPlatform clPlatform = JavaCL.listPlatforms()[0];
 
-        // Getting the all devices
+        // Getting all devices
         CLDevice device = clPlatform.listAllDevices(true)[0];
 
-        // Let's make a context
+        // making context
         CLContext context = JavaCL.createContext(null, device);
 
-        // Lets make a default FIFO queue.
+        // making a default FIFO queue.
         CLQueue queue = context.createDefaultQueue();
 
-        // Read the program sources and compile them :
+        // Reading the program sources and compiling:
         String src = "__kernel void fill_in_values(__global const float* a, __global const float* b, __global float* out1, __global float* out2, float pi, int n) \n" +
                 "{\n" +
                 "    int i = get_global_id(0);\n" +
@@ -87,15 +92,17 @@ public class GPUGenerator implements I_RandomVectorGenerator {
                 aPtr = allocateFloats(n),
                 bPtr = allocateFloats(n);
         // store the uniform vector in order for GPU to generate Gaussian
-        double[] uniformSequence = (new UniformRandomNumberGenerator(2*batchNum)).getVector();
-        // Generate uniform sequence and assign to aPtr and bPtr
+        RandomNumberGenerator r1 = new RandomNumberGenerator(2*batchNum);
+        ArrayList<Double> a1 = r1.randomvectorgenerator(x,y,N);
+        double[] uniformSequence =r1.randomvectorgenerator2(a1) ;
+
         for (int i = 0; i < n; i++) {
-            aPtr.set(i, (float) uniformSequence[2*i]);
-            bPtr.set(i, (float) uniformSequence[2*i+1]);
-            //System.out.println(uniformSequence[2*i]);
+            aPtr.set(i, (float) uniformSequence[2 * i]);
+            bPtr.set(i, (float) uniformSequence[2 * i + 1]);
+
         }
 
-        // Create OpenCL input buffers (using the native memory pointers aPtr and bPtr) :
+        // use native memory pointers aPtr and bPtr and create OpenCL input buffers) :
         CLBuffer<Float>
                 a = context.createFloatBuffer(CLMem.Usage.Input, aPtr),
                 b = context.createFloatBuffer(CLMem.Usage.Input, bPtr);
@@ -113,15 +120,14 @@ public class GPUGenerator implements I_RandomVectorGenerator {
 
             }
         });
-        final Pointer<Float> c1Ptr = out1.read(queue,event);
-        final Pointer<Float> c2Ptr = out2.read(queue,event);
+        final Pointer<Float> c1Ptr = out1.read(queue, event);
+        final Pointer<Float> c2Ptr = out2.read(queue, event);
 
-        double[] normalSequence = new double[2*batchNum];
-        for(int i = 0; i < batchNum; i++){
-            normalSequence[2*i] = (double) c1Ptr.get(i);
-            normalSequence[2*i+1] = (double) c2Ptr.get(i);
+        double[] normalSequence = new double[2 * batchNum];
+        for (int i = 0; i < batchNum; i++) {
+            normalSequence[2 * i] = (double) c1Ptr.get(i);
+            normalSequence[2 * i + 1] = (double) c2Ptr.get(i);
         }
         return normalSequence;
     }
-
 }

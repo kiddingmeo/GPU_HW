@@ -9,7 +9,7 @@ package MonteCarlo;
 import java.util.ArrayList;
 
 // Decorator that implements the interface RandomVectorGenerator.
-public class Decorator implements RandomVectorGenerator {
+public class Decorator implements MonteCarlo.RandomVectorGenerator {
 	
 	protected RandomVectorGenerator rvg;
 	

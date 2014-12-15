@@ -4,7 +4,7 @@
  * Monte-Carlo Assignment
  */
 
-package N11592683_HW3;
+package MonteCarlo;
 
 import java.util.ArrayList;
 import org.joda.time.DateTime;
